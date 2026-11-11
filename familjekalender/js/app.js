@@ -931,14 +931,23 @@
       const fs = $('.fullphoto .img');
       if (fs) fs.style.backgroundImage = `url(${u})`;
     },
+    // Tryck: bildspel i helskärm. Tryck igen: tillbaka till kalendern.
     fullscreen() {
-      if (!this.list.length) return;
+      if (!this.list.length || $('.fullphoto')) return;
       const d = document.createElement('div');
       d.className = 'fullphoto';
-      const cur = this.el.querySelector('.slide.on');
-      d.innerHTML = `<div class="img" style="background-image:${cur ? cur.style.backgroundImage : ''}"></div><div class="fp-clock"></div>`;
-      d.querySelector('.fp-clock').textContent = fTime.format(new Date());
-      d.onclick = () => d.remove();
+      d.innerHTML = '<div class="img"></div><div class="fp-clock"></div>';
+      const cur = this.el && this.el.querySelector('.slide.on');
+      if (cur) d.querySelector('.img').style.backgroundImage = cur.style.backgroundImage;
+      const tick = () => { d.querySelector('.fp-clock').textContent = fTime.format(new Date()); };
+      tick();
+      const timer = setInterval(tick, 15000);
+      d.onclick = (e) => {
+        e.stopPropagation();
+        keepAwake();
+        clearInterval(timer);
+        d.remove();
+      };
       document.body.appendChild(d);
     },
   };
